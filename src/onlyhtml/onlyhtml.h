@@ -14,10 +14,10 @@
 #define ONLYHTML_VERSION "1.0"
 
 #define HTTP_RESPOND(code, type, content) \
-"HTTP/1.1 "code"\r\n"\
-"Server: "ONLYHTML_SERVERNAME"/"ONLYHTML_VERSION"\r\n"\
-"Connection: Close\r\n\r\n"\
-content
+    "HTTP/1.1 "code"\r\n" \
+    "Server: "ONLYHTML_SERVERNAME"/"ONLYHTML_VERSION"\r\n" \
+    "Connection: Close\r\n\r\n" \
+    content
 
 #define HTTP_FILE_HTML "text/html"
 #define HTTP_FILE_IMAGE "image/jpeg"
@@ -33,7 +33,7 @@ content
 typedef struct onlyhtml_info_t {
     time_t start_time;
 #define ONLYHTML_DEF_PORT 80
-    UINT16 port;
+    uint16_t port;
     int sockfd;
     int efd;
 #define EVENTS_NUMBER 256
@@ -42,7 +42,7 @@ typedef struct onlyhtml_info_t {
 #define STATE_PREPARE 0
 #define STATE_RUNNING 1
 #define STATE_STOP 2
-    INT32 state;
+    int32_t state;
 
 #define HTTP_DEF_ROOT_DIR_LEN 128
 #define HTTP_DEF_ROOT_DIR "/var/www"
@@ -53,7 +53,7 @@ typedef struct onlyhtml_info_t {
     char e404[HTTP_DEF_404_PAGE_LEN];
 
 #define HTTP_DEF_INDEX "/index.html"
-}onlyhtml_info_t;
+} onlyhtml_info_t;
 
 #pragma pack()
 

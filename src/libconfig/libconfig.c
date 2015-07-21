@@ -10,44 +10,40 @@
 
 static FILE *g_cfg_fp = NULL;
 
-INT32 libconfig_open(char *cfg_path)
+int32_t libconfig_open(char *cfg_path)
 {
-    if (NULL == cfg_path)
-    {
-        PRINTF(LEVEL_DEBUG, "config file path is NULL.\n");
-        return R_ERROR;
+    if (NULL == cfg_path) {
+        PRINTF(LEVEL_ERROR, "config file path is NULL.\n");
+        return -1;
     }
 
-    if (NULL != g_cfg_fp)
-    {
-        PRINTF(LEVEL_DEBUG, "already opened a file, close it before a new open operation.\n");
-        return R_ERROR;
+    if (NULL != g_cfg_fp) {
+        PRINTF(LEVEL_ERROR, "already opened a file, close it before a new open operation.\n");
+        return -1;
     }
 
     g_cfg_fp = fopen(cfg_path, "rb");
-    if (NULL == g_cfg_fp)
-    {
-        PRINTF(LEVEL_DEBUG, "fopen error, path = [%s].\n", cfg_path);
-        return R_ERROR;
+    if (NULL == g_cfg_fp) {
+        PRINTF(LEVEL_ERROR, "fopen error, path = [%s].\n", cfg_path);
+        return -1;
     }
 
-    return R_OK;
+    return 0;
 }
 
-INT32 libconfig_close()
+int32_t libconfig_close()
 {
-    if (NULL == g_cfg_fp)
-    {
-        PRINTF(LEVEL_DEBUG, "not opened any config file.\n");
-        return R_ERROR;
+    if (NULL == g_cfg_fp) {
+        PRINTF(LEVEL_DEBUG, "no config file opened.\n");
+        return -1;
     }
 
     fclose(g_cfg_fp);
 
-    return R_OK;
+    return 0;
 }
 
-INT32 libconfig_get_cfg(char *key, char *value, INT32 value_len)
+int32_t libconfig_get_cfg(char *key, char *value, int32_t value_len)
 {
     char *line = NULL;
     char *real_line = NULL;
@@ -55,15 +51,14 @@ INT32 libconfig_get_cfg(char *key, char *value, INT32 value_len)
     size_t len = 0;
     size_t read;
 
-    if (NULL == key || NULL == value || 0 == value_len)
-    {
+    if (NULL == key || NULL == value || 0 == value_len) {
         PRINTF(LEVEL_ERROR, "argument error.\n");
-        return R_ERROR;
+        return -1;
     }
-    if (NULL == g_cfg_fp)
-    {
-        PRINTF(LEVEL_WARNING, "not opened any config file.\n");
-        return R_ERROR;
+
+    if (NULL == g_cfg_fp) {
+        PRINTF(LEVEL_ERROR, "no config file opened.\n");
+        return -1;
     }
 
     fseek(g_cfg_fp, SEEK_SET, 0);
@@ -75,7 +70,7 @@ INT32 libconfig_get_cfg(char *key, char *value, INT32 value_len)
         real_line = line;
 
         // 去除行首空格/制表符等无意义字符
-        while (0 != isspace((INT32)*(real_line))) real_line++;
+        while (0 != isspace((int32_t)*(real_line))) real_line++;
 
         // 注释行，跳过
         if ('#' == real_line[0])
@@ -91,42 +86,42 @@ INT32 libconfig_get_cfg(char *key, char *value, INT32 value_len)
         real_line = tmp + strlen(key);
 
         // 去除等号左测空格/制表符等无意义字符
-        while (0 != isspace((INT32)*(real_line))) real_line++;
+        while (0 != isspace((int32_t)*(real_line))) real_line++;
         // 必须是等号，是则跳过等号，否则跳过整行
         if ('=' != real_line[0])
             continue;
         else
             real_line++;
         // 去除等号右测空格/制表符等无意义字符
-        while (0 != isspace((INT32)*(real_line))) real_line++;
+        while (0 != isspace((int32_t)*(real_line))) real_line++;
         
         // 统计有效字符长度
         tmp = real_line;
-        while (0 != isprint((INT32)*(real_line)) && 0 == isspace((INT32)*(real_line))) real_line++;
+        while (0 != isprint((int32_t)*(real_line)) && 0 == isspace((int32_t)*(real_line))) real_line++;
         
-        if ((real_line == tmp) || ((real_line - tmp) > value_len))
-        {
-            //PRINTF(LEVEL_DEBUG, "value buf not enough or no valid value exsit.\n");
+        if ((real_line == tmp) || ((real_line - tmp) > value_len)) {
+            PRINTF(LEVEL_WARNING, "value buf not enough or no valid value exsit.\n");
             continue;
         }
 
         strncpy(value, tmp, real_line - tmp);
         value[real_line - tmp] = '\0';
 
-        //fclose(g_cfg_fp);
-        if (line)
+        if (line) {
             free(line);
-        return R_OK;
+        }
+
+        return 0;
     }
 
-    //fclose(g_cfg_fp);
-    if (line)
+    if (line) {
         free(line);
+    }
 
-    return R_ERROR;
+    return -1;
 }
 
-INT32 get_cfg_from_file(char *key, char *value, INT32 value_len, char *cfg_path)
+int32_t get_cfg_from_file(char *key, char *value, int32_t value_len, char *cfg_path)
 {
     FILE *fp = NULL;
     char *line = NULL;
@@ -135,18 +130,16 @@ INT32 get_cfg_from_file(char *key, char *value, INT32 value_len, char *cfg_path)
     size_t len = 0;
     size_t read;
 
-    if (NULL == key || NULL == value || 0 == value_len || NULL == cfg_path)
-    {
+    if (NULL == key || NULL == value || 0 == value_len || NULL == cfg_path) {
         PRINTF(LEVEL_ERROR, "%s argument error.\n", __func__);
-        return R_ERROR;
+        return -1;
     }
 
     memset(value, 0, value_len);
     fp = fopen(cfg_path, "rb");
-    if (NULL == fp)
-    {
+    if (NULL == fp) {
         PRINTF(LEVEL_ERROR, "%s fopen error, path = [%s].\n", __func__, cfg_path);
-        return R_ERROR;
+        return -1;
     }
 
     while ((read = getline(&line, &len, fp)) != -1) {
@@ -155,7 +148,7 @@ INT32 get_cfg_from_file(char *key, char *value, INT32 value_len, char *cfg_path)
         real_line = line;
 
         // 去除行首空格/制表符等无意义字符
-        while (0 != isspace((INT32)*(real_line))) real_line++;
+        while (0 != isspace((int32_t)*(real_line))) real_line++;
 
         // 注释行，跳过
         if ('#' == real_line[0])
@@ -171,21 +164,20 @@ INT32 get_cfg_from_file(char *key, char *value, INT32 value_len, char *cfg_path)
         real_line = tmp + strlen(key);
 
         // 去除等号左测空格/制表符等无意义字符
-        while (0 != isspace((INT32)*(real_line))) real_line++;
+        while (0 != isspace((int32_t)*(real_line))) real_line++;
         // 必须是等号，是则跳过等号，否则跳过整行
         if ('=' != real_line[0])
             continue;
         else
             real_line++;
         // 去除等号右测空格/制表符等无意义字符
-        while (0 != isspace((INT32)*(real_line))) real_line++;
+        while (0 != isspace((int32_t)*(real_line))) real_line++;
         
         // 统计有效字符长度
         tmp = real_line;
-        while (0 != isprint((INT32)*(real_line)) && 0 == isspace((INT32)*(real_line))) real_line++;
+        while (0 != isprint((int32_t)*(real_line)) && 0 == isspace((int32_t)*(real_line))) real_line++;
         
-        if ((real_line == tmp) || ((real_line - tmp) > value_len))
-        {
+        if ((real_line == tmp) || ((real_line - tmp) > value_len)) {
             PRINTF(LEVEL_WARNING, "value buf not enough or no valid value exsit.\n");
             continue;
         }
@@ -195,14 +187,16 @@ INT32 get_cfg_from_file(char *key, char *value, INT32 value_len, char *cfg_path)
 
         PRINTF(LEVEL_DEBUG, "key:%s\tvalue:%s\n", key, value);
         fclose(fp);
-        if (line)
+        if (line) {
             free(line);
-        return R_OK;
+        }
+        return 0;
     }
 
     fclose(fp);
-    if (line)
+    if (line) {
         free(line);
+    }
 
-    return R_ERROR;
+    return -1;
 }

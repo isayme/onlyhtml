@@ -10,8 +10,8 @@
 BINS := onlyhtml
 
 # libs to be created
-LIBS := liblog.so libthread.so \
-	libdaemon.so libconfig.so
+LIBS := liblog.so libconfig.so
+
 #-----------------------------------------------------------
 
 # compiler tool
@@ -25,9 +25,7 @@ CXXFLAGS := $(CFLAGS)
 SOFLAGS := -g -DLINUX -shared -fPIC -Iinc
 
 LDFLAGS := -Wl,-rpath,bin,-rpath, \
-  -Lbin \
-	-lpthread -llog -lthread -ldaemon \
-	-lconfig
+  -Lbin -llog -lconfig
 	
 # vpath indicate the searching path of the according file type
 SRCDIR := src $(shell ls -d src/*)
@@ -55,6 +53,10 @@ clean :
 		
 # common rules goes here, if the compiling procedure of your module matches one, 
 # no need to list it in SpecialRules
+libconfig.so : libconfig.c
+	$(CC) $^ $(SOFLAGS) -Lbin -llog -o $@
+	mv $@ bin/
+
 %.so : %.c
 	$(CC) $^ $(SOFLAGS) -o $@
 	mv $@ bin/
@@ -74,5 +76,3 @@ clean :
 #	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 #	mv $@ bin/
 #-----------------------------------------------------------
-
-
