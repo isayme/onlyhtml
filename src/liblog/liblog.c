@@ -12,7 +12,7 @@
 #include "defs.h"
 #include "liblog.h"
 
-static const uint8_t g_debug_str[8][8] = {
+static const uint8_t g_debug_str[8][6] = {
     "TESTS",
     "DEBUG",
     "INFOM",
@@ -23,7 +23,6 @@ static const uint8_t g_debug_str[8][8] = {
     "UNDEF",
 };
 
-// static CS_T g_log_cs = PTHREAD_RECURSIVE_MUTEX_INITIALIZER;
 static FILE *g_logfile = NULL;
 static uint64_t g_dlevel = LEVEL_INFORM;
 static uint32_t g_range_srart = 0;
@@ -125,13 +124,10 @@ int32_t liblog_log(uint64_t mode, char *format, ...)
         mode |= COLOR_RED;
     }
 
-    // CS_ENTER(&g_log_cs);
-
     // ensure logfile has been opened
     if (NULL == g_logfile) {
         if (-1 == log_init()) {
             printf("init log file error\n");
-            // CS_LEAVE(&g_log_cs);
             return -1;
         }
     }
@@ -172,8 +168,6 @@ int32_t liblog_log(uint64_t mode, char *format, ...)
     
     fflush(stdout);
     fflush(g_logfile);
-    
-    // CS_LEAVE(&g_log_cs);
     
     return 0;
 }

@@ -56,18 +56,21 @@
 int32_t liblog_log(uint64_t mode, char *format, ...);
 
 void liblog_range(uint32_t start, uint32_t end);
+
 uint32_t liblog_range_start();
+
 uint32_t liblog_range_end();
+
 int32_t liblog_level(uint64_t level);
 
 /*#define PRINTF(mode, format, ...) \
     do { \
         liblog_log(mode, "%06d "format, __LINE__, ##__VA_ARGS__);   \
     } while (0)*/
+
 #define PRINTF(mode, format, ...) \
     do { \
-        if (__LINE__ >= liblog_range_start() && __LINE__ <= liblog_range_end()) \
-        { \
+        if (__LINE__ >= liblog_range_start() && __LINE__ <= liblog_range_end()) { \
             liblog_log(mode, "{%s:%d} "format, __FILE__, __LINE__, ##__VA_ARGS__); \
         } \
     } while (0)
