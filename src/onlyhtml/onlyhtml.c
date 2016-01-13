@@ -238,8 +238,7 @@ static void signal_init() {
  
 // signal callback function
 static void signal_func(int sig) {
-    switch(sig)
-    {
+    switch(sig) {
         case SIGINT:
         case SIGTERM:
             PRINTF(LEVEL_INFORM, "signal [%d], exit.\n", sig);
@@ -256,13 +255,13 @@ static uint32_t setnonblocking(int sockfd) {
 
     opts = fcntl(sockfd, F_GETFL);  
     if (0 > opts) {
-        PRINTF(LEVEL_ERROR, "fcntl error.\n");
+        PRINTF(LEVEL_ERROR, "fcntl get error [%d:%s]\n", errno, strerror(errno));
         return -1;  
     }
 
     opts = opts | O_NONBLOCK;
     if (0 > fcntl(sockfd, F_SETFL, opts)) {
-        PRINTF(LEVEL_ERROR, "fcntl error.\n");
+        PRINTF(LEVEL_ERROR, "fcntl set error [%d:%s]\n", errno, strerror(errno));
         return -1;  
     }
 
@@ -270,46 +269,48 @@ static uint32_t setnonblocking(int sockfd) {
 }
 
 static uint32_t create_and_bind (uint16_t port) {
-    struct sockaddr_in serv;
+    struct sockaddr_in s_addr;
     int sockfd = -1;
     int opt = 1;
 
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        PRINTF(LEVEL_ERROR, "socket error!\n");
+        PRINTF(LEVEL_ERROR, "create socket error [%d:%s]\n", errno, strerror(errno));
         return -1;
     }
 
-    bzero((char *)&serv, sizeof(serv));
-    serv.sin_family = AF_INET;
-    serv.sin_addr.s_addr = htonl(INADDR_ANY);
-    serv.sin_port = htons(port);
+    bzero((char *)&s_addr, sizeof(s_addr));
+    s_addr.sin_family = AF_INET;
+    s_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    s_addr.sin_port = htons(port);
     
     if (-1 == setnonblocking(sockfd)) {
-        PRINTF(LEVEL_ERROR, "setnonblocking error.\n");
+        PRINTF(LEVEL_ERROR, "setnonblocking error [%d:%s]\n", errno, strerror(errno));
         goto _err;
     }
 
     if (-1 == setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (uint8_t *)&opt, sizeof(opt))) {
-        PRINTF(LEVEL_ERROR, "setsockopt SO_REUSEADDR fail.\n");
+        PRINTF(LEVEL_ERROR, "setsockopt SO_REUSEADDR fail [%d:%s]\n", errno, strerror(errno));
         goto _err;
     }
 
 #ifdef SO_NOSIGPIPE 
     if (-1 == setsockopt(listen_sock, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt))) {
-        PRINTF(LEVEL_ERROR, "setsockopt SO_NOSIGPIPE fail.\n");
+        PRINTF(LEVEL_ERROR, "setsockopt SO_NOSIGPIPE fail [%d:%s]\n", errno, strerror(errno));
         goto _err;
     }
 #endif
 
-    if (bind(sockfd, (struct sockaddr *)&serv, sizeof(serv)) < 0) {
-        PRINTF(LEVEL_ERROR, "bind error [%d]\n", errno);
+    if (bind(sockfd, (struct sockaddr *)&s_addr, sizeof(s_addr)) < 0) {
+        PRINTF(LEVEL_ERROR, "bind error [%d:%s]\n", errno, strerror(errno));
         goto _err;
     }
 
     return sockfd;
 
 _err:
-    if (0 <= sockfd) close(sockfd);
+    if (0 <= sockfd) {
+        close(sockfd);
+    }
     return -1;
 }
 
