@@ -10,7 +10,7 @@
 BINS := onlyhtml
 
 # libs to be created
-LIBS := liblog.so libthread.so
+LIBS := 
 #-----------------------------------------------------------
 
 # compiler tool
@@ -23,9 +23,7 @@ CXXFLAGS := $(CFLAGS)
 #compile option to .so
 SOFLAGS := -g -DLINUX -shared -fPIC -Iinc
 
-LDFLAGS := -Wl,-rpath,bin,-rpath, \
-  -Lbin \
-	-lpthread -llog -lthread
+LDFLAGS := -Wl,-rpath,bin,-rpath, -Lbin
 	
 # vpath indicate the searching path of the according file type
 SRCDIR := src $(shell ls -d src/*)
@@ -47,7 +45,7 @@ clean :
 	cd bin;\
 	rm -f $(LIBS);\
 	rm -f $(BINS);\
-	rm *.log;\
+	rm -f *.log;\
 	cd ..;
 		
 		
