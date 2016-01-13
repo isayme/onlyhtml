@@ -21,7 +21,6 @@
 
 #include "defs.h"
 #include "liblog.h"
-#include "libdaemon.h"
 #include "onlyhtml.h"
 
 static onlyhtml_info_t g_info = {0};
@@ -258,7 +257,7 @@ static INT32 check_para(int argc, char **argv)
     if (bdaemon)
     {
         printf("run as a daemon.\n");
-        daemonize();
+        daemon(1, 0);
     }
 
     chdir(g_info.root);
